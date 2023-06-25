@@ -43,7 +43,7 @@ print(sets_by_year["set_num"].head())
 print(sets_by_year["set_num"].tail())
 
 # 시각화
-plt.plot(sets_by_year.index[:-2] ,sets_by_year["set_num"][:-2] )
+# plt.plot(sets_by_year.index[:-2] ,sets_by_year["set_num"][:-2])
 
 # 연도별 테마수
 ## 연도별 테마수 평균값
@@ -56,4 +56,55 @@ print(sets_by_theme_agg)
 
 # 연도별로 출시된 테마 수를 선으로 표시 
 # 데이터세트에 전체 달이 들어간 연도만 포함(1949~2019)
-plt.plot(sets_by_theme_agg.index[:-2], sets_by_theme_agg["nr_themes"][:-2])
+# plt.plot(sets_by_theme_agg.index[:-2], sets_by_theme_agg["nr_themes"][:-2])
+
+
+
+
+# 레고 세트당 평균 파트 갯수
+parts_per_set = sets_df.groupby('year').agg({"num_parts": pd.Series.mean})
+print(parts_per_set)
+## 선점도 시각화
+### 차트에서 평균 부품 수를 기준으로 레고 세트의 크기와 복잡도가 증가하는 흐름을 파악할 수 있다
+plt.scatter(parts_per_set.index[:-2], parts_per_set["num_parts"][:-2])
+
+
+
+# 테마별 시리즈중 가장 많은 갯수를 가지고있는 테마 이름
+## 기본키 와 외래키 로 연결
+### 테마 아이디
+set_theme_count = sets_df["theme_id"].value_counts()
+set_theme_count = pd.DataFrame({"id": set_theme_count.index, "set_count": set_theme_count.values})
+print(set_theme_count.head())
+
+### 테마 이름
+theme_df = pd.read_csv('data/themes.csv')
+print(theme_df[theme_df["name"] == "Star Wars"])
+print(sets_df[sets_df["theme_id"] == 158])
+
+# 테마당 세트수와 테마 네임 데이터 합병
+merged_df = pd.merge(set_theme_count, theme_df, on='id')
+print(merged_df)
+
+# 시각화 바 차트
+plt.figure(figsize=(14,8))
+plt.xticks(fontsize=14, rotation=45)
+plt.yticks(fontsize=14)
+plt.ylabel('Nr of Sets', fontsize=14)
+plt.xlabel('Theme Name', fontsize=14)
+plt.bar(merged_df["name"][:10], merged_df["set_count"][:10])
+
+
+
+# 데이터 시각화 활용
+## 축 설정
+### 멧플롤립 에서 축 가지고 오기
+ax1 = plt.gca()
+ax2 = ax1.twinx()
+ax1.plot(sets_by_year.index[:-2] ,sets_by_year["set_num"][:-2], color="g")
+ax2.plot(sets_by_theme_agg.index[:-2], sets_by_theme_agg["nr_themes"][:-2], color="b")
+
+### label 설정
+ax1.set_xlabel("Year")
+ax1.set_ylabel("Number of sets by year", color="green")
+ax2.set_ylabel("Total number of themes by year (unique value)", color="blue")
