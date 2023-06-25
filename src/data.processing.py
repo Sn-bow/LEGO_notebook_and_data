@@ -1,5 +1,5 @@
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 colors_df = pd.read_csv('data/colors.csv')
 
@@ -33,3 +33,27 @@ print(sell_lego)
 many_num_parts_five_data = sets_df.sort_values(by="num_parts", ascending=False).head()
 print(many_num_parts_five_data)
 
+
+
+# 데이터 시각화
+
+# 연도별에 따른 세트수
+sets_by_year = sets_df.groupby('year').count()
+print(sets_by_year["set_num"].head())
+print(sets_by_year["set_num"].tail())
+
+# 시각화
+plt.plot(sets_by_year.index[:-2] ,sets_by_year["set_num"][:-2] )
+
+# 연도별 테마수
+## 연도별 테마수 평균값
+sets_by_theme_mean = sets_df[["year", "theme_id", "num_parts"]].groupby("year").mean()
+print(sets_by_theme_mean["theme_id"].head())
+## 연도별 테마 총 수 (고유값)
+sets_by_theme_agg = sets_df.groupby("year").agg({"theme_id" : pd.Series.nunique})
+sets_by_theme_agg.rename(columns={"theme_id": "nr_themes"}, inplace=True) # column 명 변경
+print(sets_by_theme_agg)
+
+# 연도별로 출시된 테마 수를 선으로 표시 
+# 데이터세트에 전체 달이 들어간 연도만 포함(1949~2019)
+plt.plot(sets_by_theme_agg.index[:-2], sets_by_theme_agg["nr_themes"][:-2])
